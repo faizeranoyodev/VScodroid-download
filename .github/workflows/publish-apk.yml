@@ -1,0 +1,49 @@
+name: Publish image fix APK
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-apk.yml']
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: image-fix-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Download and verify the APK
+        run: |
+          curl --fail --location --retry 3 --output VSCodroid-image-fix.apk 'https://github.com/faizeranoyodev/VSCodroid/releases/download/image-fix-test/VSCodroid-image-fix.apk'
+          echo '8f6f27111ba4ac5413da1d2fa5406484717e34ef2e68f12fb6f0e72459cb8b5e  VSCodroid-image-fix.apk' > SHA256SUMS
+          sha256sum --check SHA256SUMS
+          zip VSCodroid-image-fix-install.zip VSCodroid-image-fix.apk
+          sha256sum VSCodroid-image-fix-install.zip >> SHA256SUMS
+          cat > RELEASE_NOTES.md <<'NOTES'
+          Unofficial VSCodroid test build with gallery image selection and image clipboard support.
+
+          Download **VSCodroid-image-fix.apk** and install it on your Android device. If your browser blocks APK downloads, download **VSCodroid-image-fix-install.zip**, extract it, and install the APK inside.
+
+          - Requires Android 13+ and an ARM64 device.
+          - Installs separately as `com.vscodroid.debug`.
+          - Build, unit tests, lint, APK integrity and Android signature verification passed. Testing on an actual Android device is still needed.
+          - Private extension composers may require additional fixes.
+          - Source: https://github.com/faizeranoyodev/VSCodroid/tree/7387cf0ed269839f0c1cf14aa765b4edba5de049
+          - Original project: https://github.com/rmyndharis/VSCodroid
+
+          `SHA256SUMS` contains the download checksums.
+          NOTES
+      - name: Publish downloads
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" VSCodroid-image-fix.apk VSCodroid-image-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" VSCodroid-image-fix.apk VSCodroid-image-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid image attachment test APK' --notes-file RELEASE_NOTES.md
+          fi
