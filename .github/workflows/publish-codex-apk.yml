@@ -1,4 +1,4 @@
-name: Publish Codex test APK
+name: Publish Codex image input APK
 on:
   push:
     branches: [main]
@@ -13,33 +13,36 @@ jobs:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
-      RELEASE_TAG: codex-startup-test
+      RELEASE_TAG: codex-images-test
     steps:
       - name: Download verified APK
         run: |
-          curl --fail --location --retry 3 --output VSCodroid-codex-fix.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-startup-test/VSCodroid-codex-fix.apk
-          echo '1c4954a3930fd68b734beb9a28742c3dbf63add3543c0650ce5aa9d4d90a4d9c  VSCodroid-codex-fix.apk' > SHA256SUMS
+          curl --fail --location --retry 3 --output VSCodroid-codex-images.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-images-test/VSCodroid-codex-images.apk
+          echo 'aa565f3c7ca6fdabe152bb38ebd788cd01522b7c09d9202104e25f23e5c120ae  VSCodroid-codex-images.apk' > SHA256SUMS
           sha256sum --check SHA256SUMS
-          zip VSCodroid-codex-fix-install.zip VSCodroid-codex-fix.apk
-          sha256sum VSCodroid-codex-fix-install.zip >> SHA256SUMS
+          zip VSCodroid-codex-images-install.zip VSCodroid-codex-images.apk
+          sha256sum VSCodroid-codex-images-install.zip >> SHA256SUMS
       - name: Publish download files
         run: |
           cat > NOTES.md <<'NOTES'
-          Unofficial VSCodroid Codex startup test APK. Includes the earlier gallery/image-paste fix.
+          Unofficial VSCodroid Codex image input test APK.
 
-          1. Force-stop your previous VSCodroid app, then install and open this APK. It installs separately as `com.vscodroid.codextest`, preserving the previous app and its files.
-          2. In the new app's terminal, run `mkdir -p ~/.codex`.
-          3. Install Codex extension **26.908.40401**, disable its automatic updates, then open Codex and sign in.
+          1. Force-stop your previous VSCodroid app and install this APK. Use the installer's Open button to open the new test app. It installs separately as `com.vscodroid.codeximages`, preserving the previous app and its data.
+          2. Install Codex extension **26.908.40401**, disable its automatic updates, and sign in.
+          3. In a Codex chat, use + to choose an image/file from Android storage. Tap the composer before inserting an image from Gboard's clipboard tiles.
 
-          Requires Android 13+ and ARM64. Build, unit tests, lint, APK signature/integrity, exact backend payload digests, and ARM64 Linux backend initialization checks passed. Actual Android device startup, sign-in and coding tasks still need testing. Approval and sandbox settings are unchanged; Android may impose additional restrictions on Linux tools.
+          Codex attachments now use Android's document picker. Images committed by the keyboard are delivered as file paste events through focused extension frames. PNG, JPEG, GIF and WebP are supported; files are limited to 20 MB.
+          Keeps the working Codex startup fixes. This build does not add models missing from your account/client's backend catalog.
 
-          Download the APK below. If your browser blocks APK downloads, download the ZIP and extract it first. Checksums are in SHA256SUMS.
+          Requires Android 13+ and ARM64. Build, unit tests, lint, exact code/patch/backend hashes, APK signature/integrity, and ARM64 Linux backend initialization checks passed. Image selection and keyboard insertion still need testing on your Android device.
 
-          Source: https://github.com/faizeranoyodev/VSCodroid/tree/59ba1ec4aa9a3f894c38d05bbbd4f941fddc2305
+          If your browser blocks APK downloads, download the ZIP and extract it first. Checksums are in SHA256SUMS.
+
+          Source: https://github.com/faizeranoyodev/VSCodroid/tree/1a48c4dba066d2ea6a24e111cdc1d0dfeae600cf
           Original project: https://github.com/rmyndharis/VSCodroid
           NOTES
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" VSCodroid-codex-fix.apk VSCodroid-codex-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload "$RELEASE_TAG" VSCodroid-codex-images.apk VSCodroid-codex-images-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
           else
-            gh release create "$RELEASE_TAG" VSCodroid-codex-fix.apk VSCodroid-codex-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid Codex startup test APK' --notes-file NOTES.md --prerelease
+            gh release create "$RELEASE_TAG" VSCodroid-codex-images.apk VSCodroid-codex-images-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid Codex image input test APK' --notes-file NOTES.md --prerelease
           fi
