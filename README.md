@@ -1,15 +1,25 @@
 # VScodroid-download
 
-Unofficial VSCodroid test APK with Android gallery image selection and image clipboard support.
+Unofficial VSCodroid test builds. Requires Android 13+ and ARM64.
 
-[**Download the installable APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/image-fix-test/VSCodroid-image-fix.apk)
+## Codex startup test
 
-[ZIP download](https://github.com/faizeranoyodev/VScodroid-download/releases/download/image-fix-test/VSCodroid-image-fix-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/image-fix-test)
+[**Download Codex test APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-startup-test/VSCodroid-codex-fix.apk)
 
-Requires Android 13+ and ARM64. The debug app installs separately as `com.vscodroid.debug`. Download the APK, open it, and allow your browser or file manager to install it when Android asks. If APK downloads are blocked, download the ZIP and extract the APK first.
+[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-startup-test/VSCodroid-codex-fix-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-startup-test)
 
-Build, unit tests, lint, APK integrity and Android signature verification passed. Testing on a real Android device is still needed. Isolated extension composers may require additional fixes.
+1. Force-stop your previous VSCodroid app, then install and open this APK. It installs separately as `com.vscodroid.codextest`, preserving the previous app and its files.
+2. In the new app's terminal, run `mkdir -p ~/.codex`.
+3. Install Codex extension **26.908.40401**, disable its automatic updates, then open Codex and sign in.
 
-[Fix source](https://github.com/faizeranoyodev/VSCodroid/tree/7387cf0ed269839f0c1cf14aa765b4edba5de049) · [Original VSCodroid project](https://github.com/rmyndharis/VSCodroid)
+This build packages the matching Codex backend in Android's permitted executable directory and enables its proposed APIs. It also includes the earlier image attachment fix. Build, unit tests, lint, APK signature/integrity, payload digests and ARM64 Linux backend initialization checks passed. Actual Android device testing is still needed. Approval and sandbox settings remain unchanged; Android may impose additional restrictions on Linux tools.
 
-APK SHA256: `8f6f27111ba4ac5413da1d2fa5406484717e34ef2e68f12fb6f0e72459cb8b5e`
+[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/59ba1ec4aa9a3f894c38d05bbbd4f941fddc2305/docs/CODEX_ANDROID.md)
+
+## Earlier image attachment test
+
+[Download image fix APK](https://github.com/faizeranoyodev/VScodroid-download/releases/download/image-fix-test/VSCodroid-image-fix.apk) · [ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/image-fix-test/VSCodroid-image-fix-install.zip)
+
+Installs as `com.vscodroid.debug`. The earlier build addresses gallery image selection and image clipboard support but does not include the Codex startup changes. Isolated extension composers may require further fixes.
+
+[Original VSCodroid project](https://github.com/rmyndharis/VSCodroid)

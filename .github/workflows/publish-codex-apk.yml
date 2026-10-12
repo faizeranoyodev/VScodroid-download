@@ -1,0 +1,45 @@
+name: Publish Codex test APK
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-codex-apk.yml']
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: codex-startup-test
+    steps:
+      - name: Download verified APK
+        run: |
+          curl --fail --location --retry 3 --output VSCodroid-codex-fix.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-startup-test/VSCodroid-codex-fix.apk
+          echo '1c4954a3930fd68b734beb9a28742c3dbf63add3543c0650ce5aa9d4d90a4d9c  VSCodroid-codex-fix.apk' > SHA256SUMS
+          sha256sum --check SHA256SUMS
+          zip VSCodroid-codex-fix-install.zip VSCodroid-codex-fix.apk
+          sha256sum VSCodroid-codex-fix-install.zip >> SHA256SUMS
+      - name: Publish download files
+        run: |
+          cat > NOTES.md <<'NOTES'
+          Unofficial VSCodroid Codex startup test APK. Includes the earlier gallery/image-paste fix.
+
+          1. Force-stop your previous VSCodroid app, then install and open this APK. It installs separately as `com.vscodroid.codextest`, preserving the previous app and its files.
+          2. In the new app's terminal, run `mkdir -p ~/.codex`.
+          3. Install Codex extension **26.908.40401**, disable its automatic updates, then open Codex and sign in.
+
+          Requires Android 13+ and ARM64. Build, unit tests, lint, APK signature/integrity, exact backend payload digests, and ARM64 Linux backend initialization checks passed. Actual Android device startup, sign-in and coding tasks still need testing. Approval and sandbox settings are unchanged; Android may impose additional restrictions on Linux tools.
+
+          Download the APK below. If your browser blocks APK downloads, download the ZIP and extract it first. Checksums are in SHA256SUMS.
+
+          Source: https://github.com/faizeranoyodev/VSCodroid/tree/59ba1ec4aa9a3f894c38d05bbbd4f941fddc2305
+          Original project: https://github.com/rmyndharis/VSCodroid
+          NOTES
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" VSCodroid-codex-fix.apk VSCodroid-codex-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" VSCodroid-codex-fix.apk VSCodroid-codex-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid Codex startup test APK' --notes-file NOTES.md --prerelease
+          fi
