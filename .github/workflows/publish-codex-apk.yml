@@ -1,4 +1,4 @@
-name: Publish Codex model catalog APK
+name: Publish Codex screenshot paste fix APK
 on:
   push:
     branches: [main]
@@ -13,37 +13,35 @@ jobs:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
-      RELEASE_TAG: codex-models-test
+      RELEASE_TAG: codex-paste-fix-test
     steps:
       - name: Download verified APK
         run: |
-          curl --fail --location --retry 3 --output VSCodroid-codex-models.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-models-test/VSCodroid-codex-models.apk
-          echo '81ca375915a716126274a73287ae83ee62aff4ede0accb53b6fc8586dc8fddc0  VSCodroid-codex-models.apk' > SHA256SUMS
+          curl --fail --location --retry 3 --output VSCodroid-codex-paste-fix.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-paste-fix-test/VSCodroid-codex-paste-fix.apk
+          echo 'cc04959d7ce0ee9b83d7511075569796e8d3a0374f8e7fef5328bc9fe233a9db  VSCodroid-codex-paste-fix.apk' > SHA256SUMS
           sha256sum --check SHA256SUMS
-          zip VSCodroid-codex-models-install.zip VSCodroid-codex-models.apk
-          sha256sum VSCodroid-codex-models-install.zip >> SHA256SUMS
+          zip VSCodroid-codex-paste-fix-install.zip VSCodroid-codex-paste-fix.apk
+          sha256sum VSCodroid-codex-paste-fix-install.zip >> SHA256SUMS
       - name: Publish download files
         run: |
           cat > NOTES.md <<'NOTES'
-          Unofficial VSCodroid stable Codex backend/model catalog test APK.
+          Unofficial VSCodroid keyboard screenshot paste crash fix.
+          
+          Fixes the Android 14 crash where keyboard image commits called WebView.getUrl and evaluateJavascript from InputConnectionHandlerThread. All WebView operations now dispatch to the main thread; URI image reading stays on the bounded background worker. Queued commits check the view's destruction and localhost URL before accessing it.
 
-          1. Force-stop old VSCodroid apps. Install this APK and use the installer's Open button. It installs separately as `com.vscodroid.codexmodels` (version code 18), preserving previous apps and data.
-          2. Install Codex extension **26.908.40401**, disable automatic extension updates, and sign in.
-          3. Reload the window, open a new chat and choose **GPT-6.1 Sol** in the model picker when available.
+          Version code 19; separate package com.vscodroid.codexpaste. Force-stop old VSCodroid apps, install this APK, and use the installer's Open button. Previous apps and their data remain installed. The separate app needs Codex extension 26.908.40401 and sign-in; disable extension auto-updates.
 
-          Upgrades the Android-packaged backend to stable **0.162.1**, whose bundled catalog includes `gpt-6.1-sol`. The backend validates catalog caches against client version and authentication identity. Account/workspace access remains controlled by the service.
+          Retains the stable Codex 0.162.1 backend/model catalog, the Android gallery picker, image paste routing and Codex startup compatibility fixes. Requires Android 13+ and ARM64.
 
-          Retains the Codex Android + file/image picker, native keyboard image input and previous startup fixes. Requires Android 13+ and ARM64.
+          Checks: APK build, unit tests, instrumented-test compilation, lint, exact binary/image/patch digests, ZIP integrity, APK signature and ARM64 backend protocol smoke checks. The new real-WebView regression tests are compiled but require a device to execute. Keyboard screenshot paste and signed-in chat still need your phone test.
 
-          Passed APK build, unit tests, instrumented-test compilation, lint, exact binary/image/patch digests, ZIP integrity, Android signature verification and ARM64 protocol smoke checks. The APK's backend returned gpt-6.1-sol in its unauthenticated model list and passed the pinned extension's initialization/config/auth/remote-control/filesystem requests. No account credentials or inference calls were used. Your signed-in model availability still needs testing on the phone.
-
-          Setup and filtered model diagnostics are in the repository README. Download the ZIP alternative if your browser blocks APK downloads.
-
-          Source: https://github.com/faizeranoyodev/VSCodroid/tree/529c39d7fdb411fa8e1f3ee8f652fc6f106f9333
+          Source: https://github.com/faizeranoyodev/VSCodroid/tree/8950b3a592dadacacf364fa0e429d990748c66ff
           Original project: https://github.com/rmyndharis/VSCodroid
+
+          Download the ZIP alternative if the browser blocks APK downloads.
           NOTES
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" VSCodroid-codex-models.apk VSCodroid-codex-models-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload "$RELEASE_TAG" VSCodroid-codex-paste-fix.apk VSCodroid-codex-paste-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
           else
-            gh release create "$RELEASE_TAG" VSCodroid-codex-models.apk VSCodroid-codex-models-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid Codex model catalog test APK' --notes-file NOTES.md --prerelease
+            gh release create "$RELEASE_TAG" VSCodroid-codex-paste-fix.apk VSCodroid-codex-paste-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid keyboard screenshot paste crash fix' --notes-file NOTES.md --prerelease
           fi
