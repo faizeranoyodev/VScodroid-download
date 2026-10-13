@@ -28,7 +28,7 @@ jobs:
             fi
           done
           for asset in VSCodroid-codex-paste-fix-install.zip SHA256SUMS; do
-            if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | rg -Fx "$asset"; then
+            if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx "$asset"; then
               gh release delete-asset "$RELEASE_TAG" "$asset" --repo "$GITHUB_REPOSITORY" --yes
             fi
           done
