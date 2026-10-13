@@ -2,7 +2,27 @@
 
 Unofficial VSCodroid test builds. Requires Android 13+ and ARM64.
 
-## Codex stable backend/model catalog test (latest)
+## Keyboard screenshot paste crash fix (latest)
+
+[**Download paste-fix APK — build 19**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-paste-fix-test/VSCodroid-codex-paste-fix.apk)
+
+[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-paste-fix-test/VSCodroid-codex-paste-fix-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-paste-fix-test)
+
+Fixes the reported Android 14 crash when pasting screenshots from the keyboard clipboard: WebView URL and JavaScript calls now run on the UI thread. Image reading stays on the bounded background worker, and queued commits check whether the editor was closed.
+
+1. Force-stop old VSCodroid apps. Install this APK and tap the installer's **Open** button. It installs separately as `com.vscodroid.codexpaste`, version code **19**, preserving previous apps and data.
+2. Install Codex **26.908.40401**, disable automatic extension updates, and sign in. The **Install from VSIX** instructions below still apply.
+3. Tap the Codex composer, then paste a screenshot from the keyboard clipboard. Gallery attachments through **+** are also retained.
+
+The backend remains stable **0.162.1**, including the newer model catalog. Signed-in model availability remains controlled by your account/workspace.
+
+APK build, unit tests, lint, archive integrity, exact packaged-file hashes, Android signature and ARM64 backend protocol checks passed. The two new real-WebView regression tests compile; executing them and confirming screenshot paste require an Android device.
+
+Earlier image/model builds 17 and 18 can crash on keyboard image paste; use build 19 for that test.
+
+[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/8950b3a592dadacacf364fa0e429d990748c66ff/docs/CODEX_ANDROID.md)
+
+## Earlier Codex stable backend/model catalog test
 
 [**Download Codex models APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-models-test/VSCodroid-codex-models.apk)
 
