@@ -2,7 +2,32 @@
 
 Unofficial VSCodroid test builds. Requires Android 13+ and ARM64.
 
-## Codex image input test (latest)
+## Codex stable backend/model catalog test (latest)
+
+[**Download Codex models APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-models-test/VSCodroid-codex-models.apk)
+
+[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-models-test/VSCodroid-codex-models-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-models-test)
+
+1. Force-stop your old VSCodroid apps, install this APK, and tap the installer's **Open** button. This separate app is `com.vscodroid.codexmodels`, version code 18; previous apps and data remain available.
+2. Install Codex **26.908.40401**, disable automatic extension updates, and sign in. Use the terminal download and **Install from VSIX** instructions below if needed.
+3. Run **Developer: Reload Window**, open a new Codex chat, and check the model picker for **GPT-6.1 Sol**.
+
+The bundled backend is upgraded to stable **0.162.1** and its model catalog includes `gpt-6.1-sol`. It checks cache client version and authentication identity. The APK also retains all previous Android image picker, keyboard image paste and Codex startup fixes.
+
+Build, unit tests, lint, Android signature/integrity and exact payload digests passed. The exact ARM64 binary from the APK passed the pinned extension's startup/config/model/auth/remote-control/filesystem requests and listed gpt-6.1-sol without sign-in. This checks client support; your actual account's available models still need confirmation on the phone.
+
+If the model is still missing after sign-in and reload, run:
+
+```sh
+"$VSCODROID_NATIVE_LIB_DIR/libcodex.so" --version
+"$VSCODROID_NATIVE_LIB_DIR/libcodex.so" debug models | python3 -c 'import json,sys; d=json.load(sys.stdin); print("\n".join(m["slug"] for m in d.get("models",[])))'
+```
+
+Send the version and short model list. Account/workspace availability may filter the returned catalog.
+
+[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/529c39d7fdb411fa8e1f3ee8f652fc6f106f9333/docs/CODEX_ANDROID.md)
+
+## Earlier Codex image input test
 
 [**Download Codex images APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-images-test/VSCodroid-codex-images.apk)
 
