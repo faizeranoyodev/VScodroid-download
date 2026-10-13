@@ -1,4 +1,4 @@
-name: Publish Codex image input APK
+name: Publish Codex model catalog APK
 on:
   push:
     branches: [main]
@@ -13,36 +13,37 @@ jobs:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
-      RELEASE_TAG: codex-images-test
+      RELEASE_TAG: codex-models-test
     steps:
       - name: Download verified APK
         run: |
-          curl --fail --location --retry 3 --output VSCodroid-codex-images.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-images-test/VSCodroid-codex-images.apk
-          echo 'aa565f3c7ca6fdabe152bb38ebd788cd01522b7c09d9202104e25f23e5c120ae  VSCodroid-codex-images.apk' > SHA256SUMS
+          curl --fail --location --retry 3 --output VSCodroid-codex-models.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-models-test/VSCodroid-codex-models.apk
+          echo '81ca375915a716126274a73287ae83ee62aff4ede0accb53b6fc8586dc8fddc0  VSCodroid-codex-models.apk' > SHA256SUMS
           sha256sum --check SHA256SUMS
-          zip VSCodroid-codex-images-install.zip VSCodroid-codex-images.apk
-          sha256sum VSCodroid-codex-images-install.zip >> SHA256SUMS
+          zip VSCodroid-codex-models-install.zip VSCodroid-codex-models.apk
+          sha256sum VSCodroid-codex-models-install.zip >> SHA256SUMS
       - name: Publish download files
         run: |
           cat > NOTES.md <<'NOTES'
-          Unofficial VSCodroid Codex image input test APK.
+          Unofficial VSCodroid stable Codex backend/model catalog test APK.
 
-          1. Force-stop your previous VSCodroid app and install this APK. Use the installer's Open button to open the new test app. It installs separately as `com.vscodroid.codeximages`, preserving the previous app and its data.
-          2. Install Codex extension **26.908.40401**, disable its automatic updates, and sign in.
-          3. In a Codex chat, use + to choose an image/file from Android storage. Tap the composer before inserting an image from Gboard's clipboard tiles.
+          1. Force-stop old VSCodroid apps. Install this APK and use the installer's Open button. It installs separately as `com.vscodroid.codexmodels` (version code 18), preserving previous apps and data.
+          2. Install Codex extension **26.908.40401**, disable automatic extension updates, and sign in.
+          3. Reload the window, open a new chat and choose **GPT-6.1 Sol** in the model picker when available.
 
-          Codex attachments now use Android's document picker. Images committed by the keyboard are delivered as file paste events through focused extension frames. PNG, JPEG, GIF and WebP are supported; files are limited to 20 MB.
-          Keeps the working Codex startup fixes. This build does not add models missing from your account/client's backend catalog.
+          Upgrades the Android-packaged backend to stable **0.162.1**, whose bundled catalog includes `gpt-6.1-sol`. The backend validates catalog caches against client version and authentication identity. Account/workspace access remains controlled by the service.
 
-          Requires Android 13+ and ARM64. Build, unit tests, lint, exact code/patch/backend hashes, APK signature/integrity, and ARM64 Linux backend initialization checks passed. Image selection and keyboard insertion still need testing on your Android device.
+          Retains the Codex Android + file/image picker, native keyboard image input and previous startup fixes. Requires Android 13+ and ARM64.
 
-          If your browser blocks APK downloads, download the ZIP and extract it first. Checksums are in SHA256SUMS.
+          Passed APK build, unit tests, instrumented-test compilation, lint, exact binary/image/patch digests, ZIP integrity, Android signature verification and ARM64 protocol smoke checks. The APK's backend returned gpt-6.1-sol in its unauthenticated model list and passed the pinned extension's initialization/config/auth/remote-control/filesystem requests. No account credentials or inference calls were used. Your signed-in model availability still needs testing on the phone.
 
-          Source: https://github.com/faizeranoyodev/VSCodroid/tree/1a48c4dba066d2ea6a24e111cdc1d0dfeae600cf
+          Setup and filtered model diagnostics are in the repository README. Download the ZIP alternative if your browser blocks APK downloads.
+
+          Source: https://github.com/faizeranoyodev/VSCodroid/tree/529c39d7fdb411fa8e1f3ee8f652fc6f106f9333
           Original project: https://github.com/rmyndharis/VSCodroid
           NOTES
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" VSCodroid-codex-images.apk VSCodroid-codex-images-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+            gh release upload "$RELEASE_TAG" VSCodroid-codex-models.apk VSCodroid-codex-models-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
           else
-            gh release create "$RELEASE_TAG" VSCodroid-codex-images.apk VSCodroid-codex-images-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid Codex image input test APK' --notes-file NOTES.md --prerelease
+            gh release create "$RELEASE_TAG" VSCodroid-codex-models.apk VSCodroid-codex-models-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid Codex model catalog test APK' --notes-file NOTES.md --prerelease
           fi
