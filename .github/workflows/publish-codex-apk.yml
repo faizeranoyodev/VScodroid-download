@@ -1,4 +1,4 @@
-name: Publish Codex screenshot paste fix APK
+name: Keep only latest working APK
 on:
   push:
     branches: [main]
@@ -6,42 +6,60 @@ on:
 permissions:
   contents: read
 jobs:
-  publish:
+  maintain-download:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     permissions:
       contents: write
     env:
       GH_TOKEN: ${{ github.token }}
       RELEASE_TAG: codex-paste-fix-test
     steps:
-      - name: Download verified APK
+      - name: Verify retained APK before removing older downloads
         run: |
-          curl --fail --location --retry 3 --output VSCodroid-codex-paste-fix.apk https://github.com/faizeranoyodev/VSCodroid/releases/download/codex-paste-fix-test/VSCodroid-codex-paste-fix.apk
-          echo 'cc04959d7ce0ee9b83d7511075569796e8d3a0374f8e7fef5328bc9fe233a9db  VSCodroid-codex-paste-fix.apk' > SHA256SUMS
-          sha256sum --check SHA256SUMS
-          zip VSCodroid-codex-paste-fix-install.zip VSCodroid-codex-paste-fix.apk
-          sha256sum VSCodroid-codex-paste-fix-install.zip >> SHA256SUMS
-      - name: Publish download files
+          test "$GITHUB_REPOSITORY" = 'faizeranoyodev/VScodroid-download'
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern VSCodroid-codex-paste-fix.apk --dir verified
+          echo 'cc04959d7ce0ee9b83d7511075569796e8d3a0374f8e7fef5328bc9fe233a9db  verified/VSCodroid-codex-paste-fix.apk' | sha256sum --check
+      - name: Keep one release and one APK
         run: |
+          for tag in image-fix-test codex-startup-test codex-images-test codex-models-test; do
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              gh release delete "$tag" --repo "$GITHUB_REPOSITORY" --yes
+            fi
+          done
+          for asset in VSCodroid-codex-paste-fix-install.zip SHA256SUMS; do
+            if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | rg -Fx "$asset"; then
+              gh release delete-asset "$RELEASE_TAG" "$asset" --repo "$GITHUB_REPOSITORY" --yes
+            fi
+          done
           cat > NOTES.md <<'NOTES'
-          Unofficial VSCodroid keyboard screenshot paste crash fix.
+          Unofficial VSCodroid — latest APK, build 19.
           
-          Fixes the Android 14 crash where keyboard image commits called WebView.getUrl and evaluateJavascript from InputConnectionHandlerThread. All WebView operations now dispatch to the main thread; URI image reading stays on the bounded background worker. Queued commits check the view's destruction and localhost URL before accessing it.
-
-          Version code 19; separate package com.vscodroid.codexpaste. Force-stop old VSCodroid apps, install this APK, and use the installer's Open button. Previous apps and their data remain installed. The separate app needs Codex extension 26.908.40401 and sign-in; disable extension auto-updates.
-
-          Retains the stable Codex 0.162.1 backend/model catalog, the Android gallery picker, image paste routing and Codex startup compatibility fixes. Requires Android 13+ and ARM64.
-
-          Checks: APK build, unit tests, instrumented-test compilation, lint, exact binary/image/patch digests, ZIP integrity, APK signature and ARM64 backend protocol smoke checks. The new real-WebView regression tests are compiled but require a device to execute. Keyboard screenshot paste and signed-in chat still need your phone test.
-
+          Requires Android 13+ and ARM64. Package: com.vscodroid.codexpaste.
+          
+          Codex starts successfully, GPT-6.1 Sol appears in the model picker, and files/images can be attached with the + button. Clipboard image paste remains unresolved; use + to attach screenshots.
+          
+          Force-stop other VSCodroid apps before opening this app. Install Codex extension 26.908.40401, disable its automatic updates, and sign in.
+          
+          Includes Codex backend 0.162.1 and the WebView thread-crash fix. APK build, unit tests, lint, signature, integrity and ARM64 backend checks passed.
+          
+          SHA256: cc04959d7ce0ee9b83d7511075569796e8d3a0374f8e7fef5328bc9fe233a9db
+          
           Source: https://github.com/faizeranoyodev/VSCodroid/tree/8950b3a592dadacacf364fa0e429d990748c66ff
           Original project: https://github.com/rmyndharis/VSCodroid
-
-          Download the ZIP alternative if the browser blocks APK downloads.
           NOTES
-          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_TAG" VSCodroid-codex-paste-fix.apk VSCodroid-codex-paste-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
-          else
-            gh release create "$RELEASE_TAG" VSCodroid-codex-paste-fix.apk VSCodroid-codex-paste-fix-install.zip SHA256SUMS --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title 'VSCodroid keyboard screenshot paste crash fix' --notes-file NOTES.md --prerelease
-          fi
+          gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title 'VSCodroid — latest APK (build 19)' --notes-file NOTES.md --prerelease=false --latest
+      - name: Verify final download inventory
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" > releases.json
+          python3 - <<'PY'
+          import json
+          releases = json.load(open('releases.json'))
+          assert len(releases) == 1, 'Expected one downloadable release'
+          release = releases[0]
+          assert release['tag_name'] == 'codex-paste-fix-test'
+          assert not release['prerelease'] and not release['draft']
+          assert [a['name'] for a in release['assets']] == ['VSCodroid-codex-paste-fix.apk']
+          assert release['assets'][0]['digest'] == 'sha256:cc04959d7ce0ee9b83d7511075569796e8d3a0374f8e7fef5328bc9fe233a9db'
+          print('PASS: one release, one verified APK')
+          PY

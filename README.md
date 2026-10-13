@@ -1,95 +1,28 @@
 # VScodroid-download
 
-Unofficial VSCodroid test builds. Requires Android 13+ and ARM64.
+[**Download the latest APK — build 19**](https://github.com/faizeranoyodev/VScodroid-download/releases/latest/download/VSCodroid-codex-paste-fix.apk)
 
-## Keyboard screenshot paste crash fix (latest)
+Unofficial VSCodroid build for **Android 13+ / ARM64**. This repository keeps one release with one APK.
 
-[**Download paste-fix APK — build 19**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-paste-fix-test/VSCodroid-codex-paste-fix.apk)
+Codex startup, the GPT-6.1 Sol model picker, and image/file attachments through **+** work. **Clipboard image paste remains unresolved; use + for screenshots.**
 
-[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-paste-fix-test/VSCodroid-codex-paste-fix-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-paste-fix-test)
+## Install
 
-Fixes the reported Android 14 crash when pasting screenshots from the keyboard clipboard: WebView URL and JavaScript calls now run on the UI thread. Image reading stays on the bounded background worker, and queued commits check whether the editor was closed.
+1. Force-stop other VSCodroid apps, install this APK, and tap **Open**. Its package is `com.vscodroid.codexpaste`, version code **19**; your previously installed apps and data remain available.
+2. Install Codex **26.908.40401**, disable automatic extension updates, and sign in.
+3. Use **+** in the composer to attach screenshots or files.
 
-1. Force-stop old VSCodroid apps. Install this APK and tap the installer's **Open** button. It installs separately as `com.vscodroid.codexpaste`, version code **19**, preserving previous apps and data.
-2. Install Codex **26.908.40401**, disable automatic extension updates, and sign in. The **Install from VSIX** instructions below still apply.
-3. Tap the Codex composer, then paste a screenshot from the keyboard clipboard. Gallery attachments through **+** are also retained.
-
-The backend remains stable **0.162.1**, including the newer model catalog. Signed-in model availability remains controlled by your account/workspace.
-
-APK build, unit tests, lint, archive integrity, exact packaged-file hashes, Android signature and ARM64 backend protocol checks passed. The two new real-WebView regression tests compile; executing them and confirming screenshot paste require an Android device.
-
-Earlier image/model builds 17 and 18 can crash on keyboard image paste; use build 19 for that test.
-
-[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/8950b3a592dadacacf364fa0e429d990748c66ff/docs/CODEX_ANDROID.md)
-
-## Earlier Codex stable backend/model catalog test
-
-[**Download Codex models APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-models-test/VSCodroid-codex-models.apk)
-
-[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-models-test/VSCodroid-codex-models-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-models-test)
-
-1. Force-stop your old VSCodroid apps, install this APK, and tap the installer's **Open** button. This separate app is `com.vscodroid.codexmodels`, version code 18; previous apps and data remain available.
-2. Install Codex **26.908.40401**, disable automatic extension updates, and sign in. Use the terminal download and **Install from VSIX** instructions below if needed.
-3. Run **Developer: Reload Window**, open a new Codex chat, and check the model picker for **GPT-6.1 Sol**.
-
-The bundled backend is upgraded to stable **0.162.1** and its model catalog includes `gpt-6.1-sol`. It checks cache client version and authentication identity. The APK also retains all previous Android image picker, keyboard image paste and Codex startup fixes.
-
-Build, unit tests, lint, Android signature/integrity and exact payload digests passed. The exact ARM64 binary from the APK passed the pinned extension's startup/config/model/auth/remote-control/filesystem requests and listed gpt-6.1-sol without sign-in. This checks client support; your actual account's available models still need confirmation on the phone.
-
-If the model is still missing after sign-in and reload, run:
-
-```sh
-"$VSCODROID_NATIVE_LIB_DIR/libcodex.so" --version
-"$VSCODROID_NATIVE_LIB_DIR/libcodex.so" debug models | python3 -c 'import json,sys; d=json.load(sys.stdin); print("\n".join(m["slug"] for m in d.get("models",[])))'
-```
-
-Send the version and short model list. Account/workspace availability may filter the returned catalog.
-
-[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/529c39d7fdb411fa8e1f3ee8f652fc6f106f9333/docs/CODEX_ANDROID.md)
-
-## Earlier Codex image input test
-
-[**Download Codex images APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-images-test/VSCodroid-codex-images.apk)
-
-[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-images-test/VSCodroid-codex-images-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-images-test)
-
-1. Force-stop the previous VSCodroid app, install this APK, and use the installer's **Open** button. The new package is `com.vscodroid.codeximages`, version code 17; your previous app and data remain available.
-2. Install Codex **26.908.40401** and disable automatic extension updates. Sign in again in the new app.
-3. Open a Codex chat. Use **+** to choose an image/file from Android storage. For a keyboard image, tap the composer first, then tap an image in Gboard's clipboard.
-
-If you need the exact extension version, run these in the new app's terminal:
+If the exact extension version is missing from the marketplace, run this in the app's terminal:
 
 ```sh
 mkdir -p ~/.codex
-python3 -c 'import os,urllib.request; print("Downloading...",flush=True); urllib.request.urlretrieve("https://open-vsx.org/api/openai/chatgpt/alpine-arm64/26.908.40401/file/openai.chatgpt-26.908.40401@alpine-arm64.vsix",os.path.expanduser("~/codex.vsix")); print("Saved: ~/codex.vsix")'
+python3 -c 'import os,urllib.request; urllib.request.urlretrieve("https://open-vsx.org/api/openai/chatgpt/alpine-arm64/26.908.40401/file/openai.chatgpt-26.908.40401@alpine-arm64.vsix",os.path.expanduser("~/codex.vsix")); print("Saved: ~/codex.vsix")'
 ```
 
-Then open the Command Palette, choose **Extensions: Install from VSIX...**, and select `codex.vsix` in your home directory. Reload the window if requested.
+Open the Command Palette, choose **Extensions: Install from VSIX...**, select `~/codex.vsix`, and reload the window.
 
-This build routes Codex file-only attachment dialogs to Android's document picker and accepts keyboard-supplied PNG, JPEG, GIF and WebP images in focused extension composers. Each file is limited to 20 MB. It retains the working Codex startup and proposed API fixes.
+The bundled Codex backend is **0.162.1**. Build, unit tests, lint, APK signature/integrity and ARM64 backend checks passed.
 
-Build, unit tests, lint, exact runtime/backend/patch hashes, APK integrity/signature and ARM64 Linux backend initialization checks passed. Actual gallery selection and keyboard insertion still need testing on your Android device. It does not add models absent from the backend catalog returned to your account/client.
+APK SHA256: `cc04959d7ce0ee9b83d7511075569796e8d3a0374f8e7fef5328bc9fe233a9db`
 
-[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/1a48c4dba066d2ea6a24e111cdc1d0dfeae600cf/docs/CODEX_ANDROID.md)
-
-## Codex startup test
-
-[**Download Codex test APK**](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-startup-test/VSCodroid-codex-fix.apk)
-
-[ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/codex-startup-test/VSCodroid-codex-fix-install.zip) · [Release and checksums](https://github.com/faizeranoyodev/VScodroid-download/releases/tag/codex-startup-test)
-
-1. Force-stop your previous VSCodroid app, then install and open this APK. It installs separately as `com.vscodroid.codextest`, preserving the previous app and its files.
-2. In the new app's terminal, run `mkdir -p ~/.codex`.
-3. Install Codex extension **26.908.40401**, disable its automatic updates, then open Codex and sign in.
-
-This build packages the matching Codex backend in Android's permitted executable directory and enables its proposed APIs. It also includes the earlier image attachment fix. Build, unit tests, lint, APK signature/integrity, payload digests and ARM64 Linux backend initialization checks passed. Actual Android device testing is still needed. Approval and sandbox settings remain unchanged; Android may impose additional restrictions on Linux tools.
-
-[Source and implementation](https://github.com/faizeranoyodev/VSCodroid/blob/59ba1ec4aa9a3f894c38d05bbbd4f941fddc2305/docs/CODEX_ANDROID.md)
-
-## Earlier image attachment test
-
-[Download image fix APK](https://github.com/faizeranoyodev/VScodroid-download/releases/download/image-fix-test/VSCodroid-image-fix.apk) · [ZIP alternative](https://github.com/faizeranoyodev/VScodroid-download/releases/download/image-fix-test/VSCodroid-image-fix-install.zip)
-
-Installs as `com.vscodroid.debug`. The earlier build addresses gallery image selection and image clipboard support but does not include the Codex startup changes. Isolated extension composers may require further fixes.
-
-[Original VSCodroid project](https://github.com/rmyndharis/VSCodroid)
+[Source and setup details](https://github.com/faizeranoyodev/VSCodroid/blob/8950b3a592dadacacf364fa0e429d990748c66ff/docs/CODEX_ANDROID.md) · [Original project](https://github.com/rmyndharis/VSCodroid)
